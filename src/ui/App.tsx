@@ -1,6 +1,6 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
-import { useEffect, useState } from "react";
+import { ReactElement, useEffect, useRef, useState } from "react";
 import { Col, Container, Row, Accordion } from "react-bootstrap";
 import Markdown from "react-markdown";
 
@@ -14,40 +14,42 @@ function App() {
   useEffect(() => {
     getFiles();
   }, []);
-  const md = `# hey`;
+
   return (
-    <Container>
-      <Row>
-        <Col className="sidebar">Explorer</Col>
-        <Col xs={5} contentEditable={true}>
+    <Container className="ms-0 me-0 mb-3 h90">
+      <Row className="mb-3">
+        <Col className="text-start" sm={3}>
+          Explorer
+        </Col>
+        <Col className="text-center" sm={9}>
           Title
         </Col>
       </Row>
-      <Row>
-        <Col className="sidebar">
-          <Accordion defaultActiveKey="0" className="sidebar">
-            <Accordion.Item eventKey="0">
-              <Accordion.Header>Accordion Item #1</Accordion.Header>
-              <Accordion.Body>
-                <div>kek</div>
-                <div>keek</div>
-              </Accordion.Body>
-            </Accordion.Item>
-            <Accordion.Item eventKey="1">
-              <Accordion.Header>Accordion Item #2</Accordion.Header>
-              <Accordion.Body>
-                <div>lol</div>
-                <div>loool</div>
-              </Accordion.Body>
-            </Accordion.Item>
+      <Row className="mb-3">
+        <Col sm={3}>
+          <Accordion>
+            {files.map((file, index) => {
+              return AccordionElement(file, index.toString());
+            })}
           </Accordion>
         </Col>
-        <Col xs={5} contentEditable={true}>
-          <Markdown>{md}</Markdown>
+        <Col sm={9} contentEditable={true} className="h80 overflow-auto ">
+          hey
         </Col>
       </Row>
     </Container>
   );
 }
 
+function AccordionElement(element: string, eventKey: string): JSX.Element {
+  return (
+    <Accordion.Item eventKey={eventKey}>
+      <Accordion.Header>{element}</Accordion.Header>
+      <Accordion.Body>
+        <div>kek</div>
+        <div>keek</div>
+      </Accordion.Body>
+    </Accordion.Item>
+  );
+}
 export default App;
