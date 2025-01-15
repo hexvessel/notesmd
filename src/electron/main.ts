@@ -5,8 +5,8 @@ import { readDir } from "./fileUtils.js";
 
 app.on("ready", () => {
   const mainWindow = new BrowserWindow({
-    width:1024,
-    height: 768,
+    width:1280,
+    height: 960,
     webPreferences: {
       preload: getPreloadPath(),
     }
