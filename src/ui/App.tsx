@@ -2,8 +2,6 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 import {
   MouseEvent,
-  MouseEventHandler,
-  ReactElement,
   SetStateAction,
   forwardRef,
   useEffect,
@@ -19,50 +17,36 @@ import {
   ListGroup,
 } from "react-bootstrap";
 import Markdown from "react-markdown";
+import {
+  ContentEditableEvent,
+  Editor,
+  EditorProvider,
+} from "react-simple-wysiwyg";
 
 function App() {
   const [editing, setEditing] = useState<boolean>(false);
   const [selected, setSelected] = useState<number>(0);
-  const [lines, setLines] = useState<string[]>([]);
   const [files, setFiles] = useState<filePackage[]>([
     { filename: "empty", contents: "hey", bookmarks: [] },
   ]);
 
-  const rebbi = useRef(null);
-  const clickety = (e: any) => {
-    e.preventDefault();
-    // @ts-ignore
-    rebbi.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  const toggleEditing = () => {
-    //setEditing(!editing);
+  const toggleEditing = (event: MouseEvent) => {
+    event.preventDefault();
+    setEditing(!editing);
   };
   const getFiles = async () => {
     // @ts-ignore
     const mdFilenames = await window.electron.getMarkdownFiles();
     setFiles(mdFilenames);
-    const mdlines = parser(files[0].contents);
-    setLines(mdlines);
   };
   useEffect(() => {
     getFiles();
   }, []);
-  const testement = () => {
-    const a = [];
-    let d = "";
-    const t = ["lol", "hey", "kek"];
-    t.map((value, index, array) => {
-      d += value;
-      if (index === array.length + 1) {
-      }
-    });
-    return d;
-  };
+
   return (
-    <Container className="ms-0 me-0 mb-3 h90">
-      <Row className="mb-3 ">
-        <Col className="text-start text-center" sm={1}>
+    <Container fluid className="border">
+      <Row className="">
+        <Col className="d-flex mt-3 text-start text-center" sm={1}>
           Explorer
         </Col>
         <Col sm={2} className="d-flex flex-row-reverse">
@@ -79,7 +63,7 @@ function App() {
         </Col>
         <Col sm={1} className="d-flex">
           <Button
-            onClick={clickety}
+            onClick={toggleEditing}
             variant="success"
             className="align-self-center"
           >
@@ -87,32 +71,43 @@ function App() {
           </Button>
         </Col>
       </Row>
-      <MainContentRow
-        files={files}
-        selected={selected}
-        setSelected={setSelected}
-      />
+      {editing ? (
+        <EditingBox text={files[selected].contents} />
+      ) : (
+        <MainContentRow
+          files={files}
+          selected={selected}
+          setSelected={setSelected}
+        />
+      )}
     </Container>
   );
 }
-/* 
-<Row className="mb-3">
-        <Col sm={3}>
-          <Accordion>
-            {files.map((file, index) => {
-              return AccordionElement(file.filename, index, setSelected);
-            })}
-          </Accordion>
-        </Col>
-        <Col sm={9} className="h80 overflow-auto ">
-          {editing ? (
-            files[selected].contents
-          ) : (
-            <Markdown>{files[selected].contents}</Markdown>
-          )}
-        </Col>
-      </Row>
-*/
+
+function EditingBox(props: { text: string }): JSX.Element {
+  const [editorBoxText, setEditorBoxText] = useState<string>(
+    props.text.replaceAll("\n", "<br>")
+  );
+  function onChange(e: ContentEditableEvent) {
+    setEditorBoxText(e.target.value);
+  }
+  return (
+    <Row>
+      <Col sm={2}>
+        <ListGroup>
+          <ListGroup.Item>hey</ListGroup.Item>
+          <ListGroup.Item>hey</ListGroup.Item>
+        </ListGroup>
+      </Col>
+      <Col sm={10}>
+        <EditorProvider>
+          <Editor value={editorBoxText} onChange={onChange}></Editor>
+        </EditorProvider>
+      </Col>
+    </Row>
+  );
+}
+
 function GenerateElements(textBody: string): {
   bookmarks: JSX.Element[];
   textContent: JSX.Element[];
@@ -160,11 +155,11 @@ function MainContentRow(props: {
     props.files[props.selected].contents
   );
   return (
-    <Row className="mb-3">
+    <Row className="">
       <Col sm={3}>
         <Accordion
           defaultActiveKey={props.selected.toString()}
-          className="overflow-auto h80"
+          className="overflow-auto h90"
         >
           {props.files.map((value, index, array) => {
             if (index === props.selected) {
@@ -195,51 +190,13 @@ function MainContentRow(props: {
           })}
         </Accordion>
       </Col>
-      <Col sm={9} className="h80 overflow-auto">
+      <Col sm={9} className="heightadj overflow-auto">
         {textContent}
       </Col>
     </Row>
   );
 }
 
-function AccordionElement(
-  element: string,
-  eventKey: number,
-  setSelected: React.Dispatch<SetStateAction<number>>
-): JSX.Element {
-  const select = () => {
-    setSelected(eventKey);
-  };
-  return (
-    <Accordion.Item
-      eventKey={eventKey.toString()}
-      key={eventKey}
-      onClick={select}
-    >
-      <Accordion.Header>{element}</Accordion.Header>
-      <Accordion.Body>
-        <div>kek</div>
-        <div>keek</div>
-      </Accordion.Body>
-    </Accordion.Item>
-  );
-}
-
-function parser(text: string): string[] {
-  let i = 0;
-  const lines = text.split("\n");
-  let bookmarks: string[] = [];
-  let jsxString = "";
-  while (i < lines.length) {
-    if (lines[i].startsWith("# ")) {
-      jsxString += `<div href=>`;
-    } else if (lines[i].startsWith("## ")) {
-    } else if (lines[i].startsWith("### ")) {
-    }
-    i++;
-  }
-  return lines;
-}
 const Target = forwardRef((props, ref) => {
   return (
     //@ts-ignore
