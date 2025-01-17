@@ -15,6 +15,7 @@ import {
   Accordion,
   Button,
   ListGroup,
+  ListGroupItem,
 } from "react-bootstrap";
 import Markdown from "react-markdown";
 import {
@@ -27,12 +28,22 @@ function App() {
   const [editing, setEditing] = useState<boolean>(false);
   const [selected, setSelected] = useState<number>(0);
   const [files, setFiles] = useState<filePackage[]>([
-    { filename: "empty", contents: "hey", bookmarks: [] },
+    { filename: "empty", contents: "Select Folder", bookmarks: [] },
   ]);
-
+  const [editorBoxText, setEditorBoxText] = useState<string>("");
   const toggleEditing = (event: MouseEvent) => {
     event.preventDefault();
     setEditing(!editing);
+    if (!editing) {
+      console.log(JSON.stringify(files[selected].contents));
+      setEditorBoxText(files[selected].contents);
+    } else {
+      const edited = editorBoxText.replaceAll("\n", "\r\n");
+      const newFiles = files;
+      newFiles[selected].contents = edited;
+      setFiles(newFiles);
+      console.log(JSON.stringify(files[selected].contents));
+    }
   };
   const getFiles = async () => {
     // @ts-ignore
@@ -72,7 +83,10 @@ function App() {
         </Col>
       </Row>
       {editing ? (
-        <EditingBox text={files[selected].contents} />
+        <EditingBox
+          editorBoxText={editorBoxText}
+          setEditorBoxText={setEditorBoxText}
+        />
       ) : (
         <MainContentRow
           files={files}
@@ -84,30 +98,84 @@ function App() {
   );
 }
 
-function EditingBox(props: { text: string }): JSX.Element {
-  const [editorBoxText, setEditorBoxText] = useState<string>(
-    props.text.replaceAll("\n", "<br>")
+function MDCheatSheet() {
+  return (
+    <ListGroup>
+      <ListGroup.Item variant="primary">Heading</ListGroup.Item>
+      <ListGroup.Item variant="secondary">
+        <div># H1</div>
+        <div>## H2</div>
+        <div>### H3</div>
+      </ListGroup.Item>
+      <ListGroup.Item variant="primary">Bold</ListGroup.Item>
+      <ListGroup.Item variant="secondary">**bold text**</ListGroup.Item>
+      <ListGroup.Item variant="primary">Italic</ListGroup.Item>
+      <ListGroup.Item variant="secondary">*italicized text*</ListGroup.Item>
+      <ListGroup.Item variant="primary">Blockquote</ListGroup.Item>
+      <ListGroup.Item variant="secondary">{"> blockquote"}</ListGroup.Item>
+      <ListGroup.Item variant="primary">Ordered List</ListGroup.Item>
+      <ListGroup.Item variant="secondary">
+        <div>1. First Item</div>
+        <div>2. Second Item</div>
+        <div>3. Third Item</div>
+      </ListGroup.Item>
+      <ListGroup.Item variant="primary">Unordered List</ListGroup.Item>
+      <ListGroup.Item variant="secondary">
+        <div>- First Item</div>
+        <div>- Second Item</div>
+        <div>- Third Item</div>
+      </ListGroup.Item>
+      <ListGroup.Item variant="primary">Code</ListGroup.Item>
+      <ListGroup.Item variant="secondary">`code`</ListGroup.Item>
+      <ListGroup.Item variant="primary">Horizontal Rule</ListGroup.Item>
+      <ListGroup.Item variant="secondary">---</ListGroup.Item>
+      <ListGroup.Item variant="primary">Link</ListGroup.Item>
+      <ListGroup.Item variant="secondary">
+        [title](https://www.example.com)
+      </ListGroup.Item>
+      <ListGroup.Item variant="primary">Image</ListGroup.Item>
+      <ListGroup.Item variant="secondary">
+        ![alt text](image.jpg)
+      </ListGroup.Item>
+    </ListGroup>
   );
-  function onChange(e: ContentEditableEvent) {
-    setEditorBoxText(e.target.value);
+}
+
+function EditingBox(props: {
+  editorBoxText: string;
+  setEditorBoxText: React.Dispatch<SetStateAction<string>>;
+}): JSX.Element {
+  const { editorBoxText, setEditorBoxText } = props;
+  const ref = useRef(null);
+  function onChange() {
+    // @ts-ignore
+    console.log(JSON.stringify(ref.current.value));
+    // @ts-ignore
+    setEditorBoxText(ref.current?.value);
   }
   return (
     <Row>
-      <Col sm={2}>
-        <ListGroup>
-          <ListGroup.Item>hey</ListGroup.Item>
-          <ListGroup.Item>hey</ListGroup.Item>
-        </ListGroup>
+      <Col sm={3} className="overflow-auto heightadj">
+        <MDCheatSheet />
       </Col>
-      <Col sm={10}>
-        <EditorProvider>
-          <Editor value={editorBoxText} onChange={onChange}></Editor>
-        </EditorProvider>
+      <Col sm={9}>
+        <textarea
+          rows={30}
+          cols={50}
+          value={editorBoxText}
+          ref={ref}
+          onChange={onChange}
+          spellCheck="false"
+        />
       </Col>
     </Row>
   );
 }
-
+/*
+ <EditorProvider>
+          <Editor value={editorBoxText} onChange={onChange}></Editor>
+        </EditorProvider>
+*/
 function GenerateElements(textBody: string): {
   bookmarks: JSX.Element[];
   textContent: JSX.Element[];
