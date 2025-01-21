@@ -1,28 +1,8 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
-import {
-  MouseEvent,
-  SetStateAction,
-  forwardRef,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import {
-  Col,
-  Container,
-  Row,
-  Accordion,
-  Button,
-  ListGroup,
-  ListGroupItem,
-} from "react-bootstrap";
-import Markdown from "react-markdown";
-import {
-  ContentEditableEvent,
-  Editor,
-  EditorProvider,
-} from "react-simple-wysiwyg";
+import { MouseEvent, useEffect, useState } from "react";
+import { Col, Container, Row, Button } from "react-bootstrap";
+import { EditingBox, MainContentRow } from "./Components";
 
 function App() {
   const [editing, setEditing] = useState<boolean>(false);
@@ -97,7 +77,7 @@ function App() {
     </Container>
   );
 }
-
+/*
 function MDCheatSheet() {
   return (
     <ListGroup>
@@ -171,11 +151,7 @@ function EditingBox(props: {
     </Row>
   );
 }
-/*
- <EditorProvider>
-          <Editor value={editorBoxText} onChange={onChange}></Editor>
-        </EditorProvider>
-*/
+
 function GenerateElements(textBody: string): {
   bookmarks: JSX.Element[];
   textContent: JSX.Element[];
@@ -270,5 +246,5 @@ const Target = forwardRef((props, ref) => {
     //@ts-ignore
     <div ref={ref}></div>
   );
-});
+});*/
 export default App;
